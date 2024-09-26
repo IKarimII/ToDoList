@@ -76,7 +76,6 @@ window.addEventListener('load', () => {
   loadTheme();
 });                                                            
 
-});
 function applyTheme() {
   if (lMode === 'light') {
     sun.classList.add('invisible');
