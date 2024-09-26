@@ -25,6 +25,40 @@ function loadFromLocalStorage() {
   }
 }
 
+function saveCheckboxState() {
+  const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+  checkboxes.forEach((checkbox, index) => {
+    localStorage.setItem(`checkbox${index}`, checkbox.checked)
+  });
+}
+function loadCheckboxState() {
+  const checkboxes = document.querySelectorAll('input[type="checkbox"]')
+  checkboxes.forEach((checkbox, index) => {
+    let storedState = localStorage.getItem(`checkbox${index}`);
+    if (storedState !== null) {
+      checkbox.checked = storedState === 'true';
+    }
+  });
+}
+
+function saveTheme() {
+  localStorage.setItem('lMode',lMode);
+}
+function loadTheme() {
+  lMode = localStorage.getItem('lMode') || 'dark';
+  lightMode()
+}
+  
+document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', saveCheckboxState);
+});
+
+window.addEventListener('load', () => {
+  loadCheckboxState();
+  loadTheme();
+  loadFromLocalStorage();
+});                                                            
+
 
 const modal = document.getElementById("myModal");
 const submitBtn = document.getElementById("submitBtn");
@@ -34,6 +68,7 @@ let userInput;
 let mode = "section"; // Track if we're adding a section or a task
 let currentSection = ""; // Track which section we are adding a task to
 let allSections = [];
+
 
 function getUserInput(type, sectionName = "") {
   mode = type; // 'section' or 'task'
@@ -179,11 +214,6 @@ inputField.addEventListener("keydown", function (event) {
 // Event listener for the submit button in the modal
 submitBtn.onclick = submitInput;
 
-// Load the data when the page loads
-window.addEventListener('load', function () {
-  loadFromLocalStorage();
-});
-
 let lMode = 'dark';
 
 const sun = document.querySelector(".lumos");
@@ -208,6 +238,7 @@ function lightMode() {
     document.querySelector('.body').classList.remove('light');
     document.querySelector('.body').classList.add('dark');
   }
+  saveTheme();
 
 }
 
