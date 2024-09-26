@@ -26,27 +26,44 @@ function loadFromLocalStorage() {
 }
 
 function saveCheckboxState() {
-  const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-  checkboxes.forEach((checkbox, index) => {
-    localStorage.setItem(`checkbox${index}`, checkbox.checked)
+  const sections = document.querySelectorAll('.sections ul');
+  const checkboxStates = {};
+
+  sections.forEach(section => {
+    const tasks = section.querySelectorAll('.task');
+    tasks.forEach(task => {
+      const label = task.querySelector('.task-label');
+      const taskText = label.textContent.trim(); // Get the task text
+      const checkbox = label.querySelector('input[type="checkbox"]');
+      checkboxStates[taskText] = checkbox.checked; // Save checkbox state associated with the task text
+    });
   });
-}
-function loadCheckboxState() {
-  const checkboxes = document.querySelectorAll('input[type="checkbox"]')
-  checkboxes.forEach((checkbox, index) => {
-    let storedState = localStorage.getItem(`checkbox${index}`);
-    if (storedState !== null) {
-      checkbox.checked = storedState === 'true';
-    }
-  });
+
+  localStorage.setItem('checkboxStates', JSON.stringify(checkboxStates));
 }
 
+function loadCheckboxState() {
+  const checkboxStates = JSON.parse(localStorage.getItem('checkboxStates')) || {};
+
+  const sections = document.querySelectorAll('.sections ul');
+  sections.forEach(section => {
+    const tasks = section.querySelectorAll('.task');
+    tasks.forEach(task => {
+      const label = task.querySelector('.task-label');
+      const taskText = label.textContent.trim(); // Get the task text
+      const checkbox = label.querySelector('input[type="checkbox"]');
+      if (checkboxStates[taskText] !== undefined) {
+        checkbox.checked = checkboxStates[taskText]; // Load saved state
+      }
+    });
+  });
+}
 function saveTheme() {
   localStorage.setItem('lMode',lMode);
 }
 function loadTheme() {
   lMode = localStorage.getItem('lMode') || 'dark';
-  lightMode()
+  applyTheme();
 }
   
 document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
@@ -54,11 +71,25 @@ document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
 });
 
 window.addEventListener('load', () => {
+  loadFromLocalStorage();
   loadCheckboxState();
   loadTheme();
-  loadFromLocalStorage();
 });                                                            
 
+});
+function applyTheme() {
+  if (lMode === 'light') {
+    sun.classList.add('invisible');
+    moon.classList.remove('invisible');
+    document.querySelector('.body').classList.remove('dark');
+    document.querySelector('.body').classList.add('light');
+  } else {
+    sun.classList.remove('invisible');
+    moon.classList.add('invisible');
+    document.querySelector('.body').classList.remove('light');
+    document.querySelector('.body').classList.add('dark');
+  }
+}
 
 const modal = document.getElementById("myModal");
 const submitBtn = document.getElementById("submitBtn");
@@ -169,6 +200,8 @@ function createTask(taskBody, sectionName) {
   var checkbox = document.createElement("input");
   checkbox.type = "checkbox";
   checkbox.name = "checkbox";
+
+  checkbox.addEventListener('change', saveCheckboxState);
 
   // Append the checkbox and task body text to the label
   label.appendChild(checkbox);
